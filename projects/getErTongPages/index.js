@@ -69,9 +69,9 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
         scriptArray.map((scriptString, index) => {
             scriptDIV.append(createScript(scriptString, "my-script-" + index));
         });
+
         /* 执行后才有 exec、 updateFunction */
         document.body.append(scriptDIV);
-        /* 执行后才有 exec、 updateFunction */
 
         /* 绑定事件 */
         let $btn;
@@ -88,8 +88,13 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
 
     page.on('console', msg => {
         console.log(msg);
-        let flag = msg.text();
-        if (flag && typeof (flag) === "string") {
+        let infoString = msg.text();
+        let type = msg.type();
+        if (type === "info" && typeof (infoString) === "string") {
+            let {
+                action,
+                content
+            } = JSON.parse(infoString);
             const STRATEGY = {
                 updateFunction: async () => {
                     /* 重新读取function */
@@ -101,8 +106,6 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
                         scriptId: "my-script-" + String(scriptArray.length - 1),
                         groupId: "my-script-group"
                     });
-
-                    console.log("scriptString, scriptId ", args);
                     try {
                         await page.evaluate((args) => {
                             let {
@@ -132,7 +135,7 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
                     }
                 }
             }
-            STRATEGY[flag] && STRATEGY[flag]();
+            STRATEGY[action] && STRATEGY[action](content);
         }
 
 

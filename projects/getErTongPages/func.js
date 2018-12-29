@@ -4,5 +4,8 @@
  * 
  */
 function exec() {
-    console.log("####");
+    postM({
+        action: "newPage",
+        content: $("html")[0].outerHTML
+    });
 }
