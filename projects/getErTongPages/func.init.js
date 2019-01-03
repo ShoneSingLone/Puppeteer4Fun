@@ -15,9 +15,21 @@ function createScript(innerHTML, id) {
     myScript.innerHTML = innerHTML;
     return myScript;
 }
-
+/**
+ * 动态更新浏览器端的执行代码
+ * 
+ */
 function updateFunction() {
     postM({
         action: "updateFunction"
+    })
+}
+/**
+ * 执行client端的代码
+ * 
+ */
+function execFunction() {
+    postM({
+        action: "execFunction"
     })
 }

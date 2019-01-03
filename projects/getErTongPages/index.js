@@ -2,15 +2,20 @@ const puppeteer = require('puppeteer');
 const Tools = require("D:/GitHub/Puppeteer4Fun/utils/file.js");
 const chalk = require('chalk');
 const $ = require('jquery')
-const mainURL = require('D:/PrivateConfings/Puppeteer4Fun/configs').mainURL_et;
-const pageUsernameInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pageUsername_et;
-const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pageUserpwd_et;
+const mainURL = require('D:/PrivateConfings/Puppeteer4Fun/configs').mainURL;
+const subURL = require('D:/PrivateConfings/Puppeteer4Fun/configs').subURL;
+const pageUsernameInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pageUsername;
+const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pageUserpwd;
 (async () => {
     // 新开一个浏览器，headless false 方便可视化代码的操作
     let browser = await puppeteer.launch({
         /* 打开的同时，headless：false */
         devtools: true,
         // headless: false
+        defaultViewport: {
+            width: 1024,
+            height: 768
+        }
     });
 
     // 开一个 tab 页
@@ -29,7 +34,6 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
 
     console.time("yzm");
     let yzmValue = await page.evaluate(() => {
-        console.log("jquery", $);
         let yzm, yzms;
         yzm = document.querySelector(`#autoyzm`);
         yzm = yzm.innerHTML;
@@ -42,11 +46,15 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
     await pageYZM.type(String(yzmValue));
     await pageSubmit.click();
     console.timeEnd("yzm");
-    await page.waitFor(1000 * 1);
+    await page.waitFor(1000 * 2);
+    // 加载 url 页面
+    await page.goto(subURL, {
+        waitUntil: 'networkidle2'
+    });
 
     let scriptArray = [];
     /* jquery */
-    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/node_modules/jquery/dist/jquery.js"));
+    // scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/node_modules/jquery/dist/jquery.js"));
     /* 处理数据的函数工具 */
     scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/ProcessData.js"));
     /* 其他的函数 */
@@ -54,7 +62,7 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
     /* 会执行的函数，保证是最后一个加入，id 与 scriptArray.length-1 相关*/
     scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.js"));
 
-    let initPage = await page.evaluate((scriptArray) => {
+    let initPage = await page.evaluate((scriptArray, htmlString) => {
         /* func.init种的function需要再init之后才能使用 */
         function createScript(innerHTML, id) {
             var myScript = document.createElement("script");
@@ -72,22 +80,13 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
 
         /* 执行后才有 exec、 updateFunction */
         document.body.append(scriptDIV);
-
-        /* 绑定事件 */
-        let $btn;
-        $btn = $("<button id='exec' onclick='exec'>exec</button>");
-        $btn[0].onclick = exec;
-        $btn.prependTo($("body"));
-        $btn = $("<button id='update-function'>updateFunction</button>");
-        $btn.on("click", updateFunction);
-        $btn.prependTo($("body"));
+        $(htmlString).prependTo($("body"));
         console.timeEnd("evaluate");
 
         return true;
-    }, scriptArray);
+    }, scriptArray, await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/component.html"));
 
     page.on('console', msg => {
-        console.log(msg);
         let infoString = msg.text();
         let type = msg.type();
         if (type === "info" && typeof (infoString) === "string") {
@@ -96,6 +95,18 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
                 content
             } = JSON.parse(infoString);
             const STRATEGY = {
+                writeFile: async () => {
+                    return await Tools.writeFile(`./files/${Date.now()+content.filename}`, content.contents)
+                },
+                execFunction: async () => {
+                    const sub = () => {
+                        const main = require('D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.client.js');
+                        return main.main;
+                        console.clear();
+                    }
+                    const main = sub();
+                    main();
+                },
                 updateFunction: async () => {
                     /* 重新读取function */
                     let scriptString = await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.js");

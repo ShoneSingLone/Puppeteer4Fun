@@ -1,7 +1,7 @@
 function consoleDataFromTable(selector, $ = window.$) {
     let $panels = $(selector);
-    getItem($panels)
-    return consoleDataFromTable;
+    return getItem($panels);
+    // return consoleDataFromTable;
 }
 // consoleDataFromTable("#panel_HqbjTjfxGtb");
 /* let aa = [];
@@ -92,9 +92,7 @@ function getItem($panels, $ = window.$) {
     rules = getRulesFrom(dslArray);
     // console.log(`dslArray`, dslArray)
     console_log += (`export let rules = ${JSON.stringify(rules)};`)
-    console.log(console_log)
-
-
+    return (console_log);
 }
 
 function getModelFrom($panels, $ = window.$) {

@@ -1,0 +1,26 @@
+<div class="btn-group-wrapper">
+    <button id='exec' onclick='exec'>exec</button>&nbsp;
+    <button id='update-function'>updateFunction</button>&nbsp;
+    <button id='exec-function'>exec client Function</button>&nbsp;
+    <textarea name="" id="exec-payload" cols="30" rows="10"></textarea>
+    <style>
+        .btn-group-wrapper {
+            padding: 1rem;
+            margin: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+    <script>
+        /* 绑定事件 */
+        let $btn;
+        $btn = $("#exec");
+        $btn[0].onclick = exec;
+        /*  */
+        $btn = $("#update-function");
+        $btn.on("click", updateFunction);
+        /*  */
+        $btn = $("");
+        $btn.on("click", execFunction);
+        /*  */
+    </script>
+</div>
