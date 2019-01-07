@@ -23,6 +23,7 @@ function updateFunction() {
     postM({
         action: "updateFunction"
     })
+    console.clear();
 }
 /**
  * 执行client端的代码
@@ -32,4 +33,5 @@ function execFunction() {
     postM({
         action: "execFunction"
     })
+    console.clear();
 }

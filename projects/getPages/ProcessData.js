@@ -9,10 +9,10 @@ Array.prototype.map.call($("#xtszLbTree .tree-title"), titleDom => {
     $title = $(titleDom);
     aa.push($title.attr("title"));
 }) */
-
 function getTableHeader(selector) {
-    debugger;
+
     let $table = $(selector);
+    debugger;
     let tableHeader = [];
     let $trs = $table.find("tr");
     Array.prototype.map.call($trs, trDom => {
@@ -36,8 +36,9 @@ function getTableHeader(selector) {
         tableHeader.push(tableTr)
         /* tableTr */
     })
+    console.log(tableHeader)
     /* tableHeader */
-    console.log(`export let dslTableHeader = ${JSON.stringify(tableHeader)}\n`, tableHeader);
+    return (`export let dslTableHeader = ${JSON.stringify(tableHeader)}`);
 }
 
 
@@ -158,7 +159,7 @@ function getDSLFrom($panels, $ = window.$) {
 
 
 
-                let $items = $td.find("[data-options]");
+                let $items = $.find("[data-options]");
                 Array.prototype.map.call($items, itemDom => {
                     let item = {
                         prop: "prop:id",

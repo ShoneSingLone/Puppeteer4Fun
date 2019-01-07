@@ -8,6 +8,8 @@
             padding: 1rem;
             margin: 1rem;
             opacity: 0.5;
+            position: relative;
+            z-index: 999999;
         }
     </style>
     <script>
@@ -19,7 +21,7 @@
         $btn = $("#update-function");
         $btn.on("click", updateFunction);
         /*  */
-        $btn = $("");
+        $btn = $("#exec-function");
         $btn.on("click", execFunction);
         /*  */
     </script>

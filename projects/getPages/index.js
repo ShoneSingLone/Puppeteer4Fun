@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const PATH = require('path');
 const Tools = require("D:/GitHub/Puppeteer4Fun/utils/file.js");
 const chalk = require('chalk');
 const $ = require('jquery')
@@ -6,6 +7,11 @@ const mainURL = require('D:/PrivateConfings/Puppeteer4Fun/configs').mainURL;
 const subURL = require('D:/PrivateConfings/Puppeteer4Fun/configs').subURL;
 const pageUsernameInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pageUsername;
 const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pageUserpwd;
+
+let resolvePath = (subpath) => {
+    return PATH.resolve("D:/GitHub/Puppeteer4Fun", subpath);
+};
+
 (async () => {
     // 新开一个浏览器，headless false 方便可视化代码的操作
     let browser = await puppeteer.launch({
@@ -13,27 +19,32 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
         devtools: true,
         // headless: false
         defaultViewport: {
-            width: 1024,
+            width: 1440,
             height: 768
         }
     });
 
-    // 开一个 tab 页
-    let page = await browser.newPage();
+    // 直接是第一个 tab 页
+    let pagesArray = await browser.pages();
+    let firstPage = pagesArray[0];
+
+    console.global = {
+        page: firstPage
+    }
 
     // 加载 url 页面
-    await page.goto(mainURL, {
+    await firstPage.goto(mainURL, {
         waitUntil: 'networkidle2'
     });
 
     // 完成验证登录
-    const pageUsername = await page.$(`#user`);
-    const pageUserpwd = await page.$(`#paw`);
-    const pageYZM = await page.$(`#yzm`);
-    const pageSubmit = await page.$(`#btnLogin`);
+    const pageUsername = await firstPage.$(`#user`);
+    const pageUserpwd = await firstPage.$(`#paw`);
+    const pageYZM = await firstPage.$(`#yzm`);
+    const pageSubmit = await firstPage.$(`#btnLogin`);
 
     console.time("yzm");
-    let yzmValue = await page.evaluate(() => {
+    let yzmValue = await firstPage.evaluate(() => {
         let yzm, yzms;
         yzm = document.querySelector(`#autoyzm`);
         yzm = yzm.innerHTML;
@@ -46,9 +57,9 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
     await pageYZM.type(String(yzmValue));
     await pageSubmit.click();
     console.timeEnd("yzm");
-    await page.waitFor(1000 * 2);
+    await firstPage.waitFor(1000 * 2);
     // 加载 url 页面
-    await page.goto(subURL, {
+    await firstPage.goto(subURL, {
         waitUntil: 'networkidle2'
     });
 
@@ -56,13 +67,13 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
     /* jquery */
     // scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/node_modules/jquery/dist/jquery.js"));
     /* 处理数据的函数工具 */
-    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/ProcessData.js"));
+    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/ProcessData.js"));
     /* 其他的函数 */
-    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.init.js"));
+    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/func.init.js"));
     /* 会执行的函数，保证是最后一个加入，id 与 scriptArray.length-1 相关*/
-    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.js"));
+    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/func.js"));
 
-    let initPage = await page.evaluate((scriptArray, htmlString) => {
+    let initPage = await firstPage.evaluate((scriptArray, htmlString) => {
         /* func.init种的function需要再init之后才能使用 */
         function createScript(innerHTML, id) {
             var myScript = document.createElement("script");
@@ -84,9 +95,9 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
         console.timeEnd("evaluate");
 
         return true;
-    }, scriptArray, await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/component.html"));
+    }, scriptArray, await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/component.html"));
 
-    page.on('console', msg => {
+    firstPage.on('console', msg => {
         let infoString = msg.text();
         let type = msg.type();
         if (type === "info" && typeof (infoString) === "string") {
@@ -96,20 +107,21 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
             } = JSON.parse(infoString);
             const STRATEGY = {
                 writeFile: async () => {
-                    return await Tools.writeFile(`./files/${Date.now()+content.filename}`, content.contents)
+                    return await Tools.writeFile(`D:/GitHub/Puppeteer4Fun/projects/getPages/files/${Date.now()+content.filename}`, content.contents)
                 },
                 execFunction: async () => {
-                    const sub = () => {
-                        const main = require('D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.client.js');
-                        return main.main;
-                        console.clear();
-                    }
-                    const main = sub();
-                    main();
+                    console.log(require.cache);
+                    /* https://stackoverflow.com/questions/15666144/how-to-remove-module-after-require-in-node-js */
+                    let targetPath = resolvePath('projects/getPages/func.client.js');
+                    /* 保证重新读取 */
+                    delete require.cache[targetPath];
+                    let main = require(targetPath).main;
+                    console.clear();
+                    main && main();
                 },
                 updateFunction: async () => {
                     /* 重新读取function */
-                    let scriptString = await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getErTongPages/func.js");
+                    let scriptString = await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/func.js");
                     scriptString = scriptString.replace("####", Date.now());
                     /* 只能是 Serializable：简单来说，就是String，目前完全够了*/
                     let args = JSON.stringify({
@@ -118,7 +130,7 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
                         groupId: "my-script-group"
                     });
                     try {
-                        await page.evaluate((args) => {
+                        await firstPage.evaluate((args) => {
                             let {
                                 scriptString,
                                 scriptId,
@@ -148,8 +160,6 @@ const pageUserpwdInput = require('D:/PrivateConfings/Puppeteer4Fun/configs').pag
             }
             STRATEGY[action] && STRATEGY[action](content);
         }
-
-
     });
     console.log("initPage", initPage);
     // await browser.close;

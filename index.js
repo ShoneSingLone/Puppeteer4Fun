@@ -1,1 +1,1 @@
-require("./projects/getErTongPages/index");
+require("./projects/getPages/index");
