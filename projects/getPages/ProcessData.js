@@ -3,7 +3,6 @@ function consoleDataFromTable(selector, $ = window.$) {
     return getItem($panels);
     // return consoleDataFromTable;
 }
-// consoleDataFromTable("#panel_HqbjTjfxGtb");
 /* let aa = [];
 Array.prototype.map.call($("#xtszLbTree .tree-title"), titleDom => {
     $title = $(titleDom);
@@ -12,7 +11,6 @@ Array.prototype.map.call($("#xtszLbTree .tree-title"), titleDom => {
 function getTableHeader(selector) {
 
     let $table = $(selector);
-    debugger;
     let tableHeader = [];
     let $trs = $table.find("tr");
     Array.prototype.map.call($trs, trDom => {

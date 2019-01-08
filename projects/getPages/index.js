@@ -20,7 +20,7 @@ let resolvePath = (subpath) => {
         // headless: false
         defaultViewport: {
             width: 1440,
-            height: 768
+            height: 2000
         }
     });
 
@@ -67,7 +67,7 @@ let resolvePath = (subpath) => {
     /* jquery */
     // scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/node_modules/jquery/dist/jquery.js"));
     /* 处理数据的函数工具 */
-    scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/ProcessData.js"));
+    // scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/ProcessData.js"));
     /* 其他的函数 */
     scriptArray.push(await Tools.readFile("D:/GitHub/Puppeteer4Fun/projects/getPages/func.init.js"));
     /* 会执行的函数，保证是最后一个加入，id 与 scriptArray.length-1 相关*/
