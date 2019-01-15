@@ -7,40 +7,64 @@ function exec() {
     writeFile()
 }
 
+function getComboboxData() {
+    let $target = $(".panel.combo-p");
+    let targetArray = [];
+    Array.prototype.map.call($target, trDom => {
+        let htmlString = trDom.innerHTML;
+        let $trDom = $(trDom);
 
-function writeFile() {
-    /* postM({
-        action: "writeFile",
-        content: {
-            contents: consoleDataFromTable("#hyxmGridToolbar"),
-            filename: `妇女病普查化验检查model.js`
-        }
-    }); */
-    postM({
-        action: "writeFile",
-        content: {
-            contents: getDSLFrom2("#asdfasdfasdfasdf"),
-            filename: `妇女病普查化验检查dsl.js`
-        }
+        let dictionary = {
+            id: $trDom.attr("id"),
+            data: []
+        };
+        let regexp = new RegExp(`class="combobox-item">([^<]*)</div>`, `g`);
+        let getItem = (full, item) => {
+            dictionary.data.push({
+                label: item,
+                value: item
+            });
+        };
+        htmlString.replace(regexp, getItem)
+        targetArray.push(dictionary);
     });
-    /* postM({
-        action: "writeFile",
-        content: {
-            contents: getTableHeader("#thisTable"),
-            filename: `妇女病普查化验检查表头-one.js`
-        },
-    }); */
-    /*   postM({
-          action: "writeFile",
-          content: {
-              contents: consoleDataFromTable("#formFnbpcJbzl"),
-              filename: `ceshi.js`
-          },
-      }); */
+    return (`module.exports = ${JSON.stringify(targetArray)}`);
 }
 
 
+function writeFile() {
+    postM({
+        action: "writeFile",
+        content: {
+            contents: getComboboxData(),
+            filename: `select${$("#exec-payload").val()}.js`
+        },
+    });
+    getComboboxData();
 
+    // postM({
+    //     action: "writeFile",
+    //     content: {
+    //         contents: getDSLFrom2("#asdfasdfasdfasdf"),
+    //         filename: `妇女病普查影像检查dsl.js`
+    //     }
+    // });
+    // postM({
+    //     action: "writeFile",
+    //     content: {
+    //         contents: getTableHeader("#header"),
+    //         filename: `随访 header.js`
+    //     },
+    // });
+    // postM({
+    //     action: "writeFile",
+    //     content: {
+    //         contents: consoleDataFromTable("#maintable"),
+    //         filename: `随访 fromTable.js`
+    //     },
+    // });
+}
+/*  */
 function consoleDataFromTable(selector, $ = window.$) {
     let $panels = $(selector);
     return getItem($panels);

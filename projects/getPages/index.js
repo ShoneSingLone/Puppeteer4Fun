@@ -20,7 +20,7 @@ let resolvePath = (subpath) => {
         // headless: false
         defaultViewport: {
             width: 1440,
-            height: 2000
+            height: 1000
         }
     });
 

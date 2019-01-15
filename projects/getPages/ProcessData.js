@@ -294,7 +294,7 @@ function converItem($subItem, subItem, $ = window.$) {
                     value,
                     text
                 });
-            })
+            });
             dataString.replace(/\{text:'([^\}]*)',value:'([^\}]*)'\}/g, (full, value, text) => {
                 data.push({
                     value,
