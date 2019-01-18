@@ -6,6 +6,7 @@ module.exports = {
     globals: {
         "postM": true,
         "require": true,
+        // "$": true,
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -21,7 +22,7 @@ module.exports = {
             "error",
             "windows"
         ], */
-        quotes: ["error", "backtick", {
+        quotes: ["error", "double", {
             "allowTemplateLiterals": true
         }],
         "semi": [

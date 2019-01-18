@@ -13,5 +13,8 @@
     "jquery": "^3.3.1",
     "mongodb": "^3.1.10",
     "puppeteer": "^1.11.0"
+  },
+  "devDependencies": {
+    "simple-pinyin": "^3.0.2"
   }
 }

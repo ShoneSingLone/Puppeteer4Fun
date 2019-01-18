@@ -65,18 +65,90 @@ function writeFile() {
          },
      }); */
 
-    let targetArray = [
-        []
-    ];
+    let targetArray = [{
+        "cc": "lyh-dnsy-contents",
+        "lx": "dasy",
+        "title": "首页"
+    }, {
+        "cc": "lyh-jbda-contents",
+        "lx": "jbzl",
+        "title": "基础档案"
+    }, {
+        "cc": "lyh-bsxwN-contents",
+        "lx": "bsxw_n",
+        "title": "病史询问(男)"
+    }, {
+        "cc": "lyh-bsxwV-contents",
+        "lx": "bsxw_v",
+        "title": "病史询问(女)"
+    }, {
+        "cc": "lyh-tgjc-contents",
+        "lx": "tgjc",
+        "title": "体格检查"
+    }, {
+        "cc": "lyh-lcjc-contents",
+        "lx": "hyjc",
+        "title": "临床检查"
+    }, {
+        "cc": "lyh-yxjc-contents",
+        "lx": "yxjc",
+        "title": "影像检查"
+    }, {
+        "cc": "lyh-pgbg-contents",
+        "lx": "pgbg",
+        "title": "评估报告"
+    }, {
+        "cc": "lyh-zysf-contents",
+        "lx": "zysf",
+        "title": "早期随访登记"
+    }, {
+        "cc": "lyh-rsjj-contents",
+        "lx": "rsjj",
+        "title": "妊娠结局登记"
+    }, {
+        "cc": "lyh-csqx-contents",
+        "lx": "csqx",
+        "title": "出生缺陷登记"
+    }];
 
     postM({
         action: "writeFile",
         content: {
-            contents: getDSLFromTable(".lyh-jbda-contents"),
-            // contents: consoleDataFromTable(".panel.theme-panel-blue.easyui-fluid"),
-            filename: `档案总览${$("#exec-payload").val()}.js`
+            contents: `export let dsl = ` + getTableHeader(`#asdfasdfasdfasdf`),
+            filename: `档案总览-table.js`
         },
     });
+
+  /*   for (let index = 0; index < targetArray.length; index++) {
+        const element = targetArray[index];
+        postM({
+            action: "writeFile",
+            content: {
+                contents: `export let dsl = ` + getDSLFromTable(`.${element.cc}`),
+                filename: `档案总览-${element.title}.js`
+            },
+        });
+    } */
+
+    /* 获取列表 */
+    /*  let $li = $("#DivyqysYwDbasy > div.lyh-left-nav.lyh-fl > ul").find("li");
+
+     let arr = Array.prototype.map.call($li, li => {
+         return {
+             cc: li.dataset.cc,
+             lx: li.dataset.lx,
+             title: li.innerHTML,
+         };
+     }); */
+
+    /*  postM({
+         action: "writeFile",
+         content: {
+             contents: JSON.stringify(arr),
+             // contents: consoleDataFromTable(".panel.theme-panel-blue.easyui-fluid"),
+             filename: `档案总览数组${$("#exec-payload").val()}.js`
+         },
+     }); */
 }
 
 /* 档案首页获取table信息
@@ -88,24 +160,25 @@ function getDSLFromTable(contentselector, $ = window.$) {
     let $contents = $(contentselector);
 
     let title = $contents.find(".lyh-right-header").text();
+    let contentArray = [];
 
     let $mainContent = $contents.find(".lyh-right-content");
 
     /* titleInfo */
-    let subTitleArray = [];
     let $subTitles = $mainContent.find(">div");
     Array.prototype.map.call($subTitles, subTitle => {
         let $subTitle = $(subTitle);
-        subTitleArray.push($subTitle.text().trim());
-        let table = subTitle.find("+table");
-        let model = {};
-        let dsl = getDSLFrom3(table);
-        dslArray.push(dsl);
-
+        let $table = $subTitle.find("+table");
+        let dsl = getDSLFrom3($table, $subTitle.text().trim());
+        let model = getModelFromDsl(dsl);
+        contentArray.push({
+            model,
+            dsl
+        });
     });
 
     /* tableInfo */
-    /*  let dslArray = [];
+    /*  
      let model = {};
      let $tables = $mainContent.find('>table');
      Array.prototype.map.call($tables, table => {
@@ -113,9 +186,23 @@ function getDSLFromTable(contentselector, $ = window.$) {
          dslArray.push(dsl);
      }) */
 
-    console.clear();
-    console.log(dslArray);
-    return JSON.stringify(dslArray);
+    return JSON.stringify({
+        title,
+        contentArray
+    });
+}
+/*  */
+function getModelFromDsl(dsl) {
+    let model = {};
+    dsl.rows.map(row => {
+        row.map(col => {
+            if (col.id) {
+                model[col.id] = "";
+            }
+        });
+    });
+
+    return model;
 }
 /*  */
 function consoleDataFromTableMultil(selector, $ = window.$) {
@@ -272,11 +359,10 @@ function getModelFrom($panels, $ = window.$) {
 /* 
 档案总览，只是展示
  */
-function getDSLFrom3(selector, $ = window.$) {
-    let $table = $(selector);
+function getDSLFrom3($table, title, $ = window.$) {
     /* Panels=>panel=>row=>col=>items? */
     let tableInfo = {
-        title: false,
+        title,
         rows: []
     };
 
