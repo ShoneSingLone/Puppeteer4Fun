@@ -3,11 +3,12 @@
  * 主执行方法
  * 
  */
+
 function exec() {
-    writeFile()
+    writeFile();
 }
 
-function getComboboxData() {
+function getComboboxData($ = window.$) {
     let $target = $(".panel.combo-p");
     let targetArray = [];
     Array.prototype.map.call($target, trDom => {
@@ -18,14 +19,14 @@ function getComboboxData() {
             id: $trDom.attr("id"),
             data: []
         };
-        let regexp = new RegExp(`class="combobox-item">([^<]*)</div>`, `g`);
+        let regexp = new RegExp("class=\"combobox-item\">([^<]*)</div>", "g");
         let getItem = (full, item) => {
             dictionary.data.push({
                 label: item,
                 value: item
             });
         };
-        htmlString.replace(regexp, getItem)
+        htmlString.replace(regexp, getItem);
         targetArray.push(dictionary);
     });
     return (`module.exports = ${JSON.stringify(targetArray)}`);
@@ -33,14 +34,13 @@ function getComboboxData() {
 
 
 function writeFile() {
-    postM({
-        action: "writeFile",
-        content: {
-            contents: getComboboxData(),
-            filename: `select${$("#exec-payload").val()}.js`
-        },
-    });
-    getComboboxData();
+    /*  postM({
+         action: "writeFile",
+         content: {
+             contents: getComboboxData(""),
+             filename: `select${$("#exec-payload").val()}.js`
+         },
+     }); */
 
     // postM({
     //     action: "writeFile",
@@ -56,15 +56,93 @@ function writeFile() {
     //         filename: `随访 header.js`
     //     },
     // });
-    // postM({
-    //     action: "writeFile",
-    //     content: {
-    //         contents: consoleDataFromTable("#maintable"),
-    //         filename: `随访 fromTable.js`
-    //     },
-    // });
+    /*  postM({
+         action: "writeFile",
+         content: {
+             contents: consoleDataFromTableMultil("#maintable"),
+             // contents: consoleDataFromTable(".panel.theme-panel-blue.easyui-fluid"),
+             filename: `mock${$("#exec-payload").val()}.js`
+         },
+     }); */
+
+    let targetArray = [
+        []
+    ];
+
+    postM({
+        action: "writeFile",
+        content: {
+            contents: getDSLFromTable(".lyh-jbda-contents"),
+            // contents: consoleDataFromTable(".panel.theme-panel-blue.easyui-fluid"),
+            filename: `档案总览${$("#exec-payload").val()}.js`
+        },
+    });
+}
+
+/* 档案首页获取table信息
+ * 有ID就是model.id = ***
+
+ */
+
+function getDSLFromTable(contentselector, $ = window.$) {
+    let $contents = $(contentselector);
+
+    let title = $contents.find(".lyh-right-header").text();
+
+    let $mainContent = $contents.find(".lyh-right-content");
+
+    /* titleInfo */
+    let subTitleArray = [];
+    let $subTitles = $mainContent.find(">div");
+    Array.prototype.map.call($subTitles, subTitle => {
+        let $subTitle = $(subTitle);
+        subTitleArray.push($subTitle.text().trim());
+        let table = subTitle.find("+table");
+        let model = {};
+        let dsl = getDSLFrom3(table);
+        dslArray.push(dsl);
+
+    });
+
+    /* tableInfo */
+    /*  let dslArray = [];
+     let model = {};
+     let $tables = $mainContent.find('>table');
+     Array.prototype.map.call($tables, table => {
+         let dsl = getDSLFrom3(table);
+         dslArray.push(dsl);
+     }) */
+
+    console.clear();
+    console.log(dslArray);
+    return JSON.stringify(dslArray);
 }
 /*  */
+function consoleDataFromTableMultil(selector, $ = window.$) {
+    let $panels = $(selector);
+    let console_log = "";
+    let model = {},
+        rules = {},
+        dslArray = [];
+    Array.prototype.map.call($panels, panel => {
+        let $panel = $(panel);
+
+        model = {
+            ...model,
+            ...getModelFrom($panel)
+        };
+        let currentDsl = getDSLFrom($panel);
+        dslArray.push(currentDsl);
+        rules = { ...rules,
+            ...getRulesFrom(currentDsl)
+        };
+    });
+    console_log += (`export let model = ${JSON.stringify(model)};`);
+    console_log += (`export let dslArray = ${JSON.stringify(dslArray)};`);
+    console_log += (`export let rules = ${JSON.stringify(rules)};`);
+    return console_log;
+}
+
 function consoleDataFromTable(selector, $ = window.$) {
     let $panels = $(selector);
     return getItem($panels);
@@ -75,7 +153,7 @@ Array.prototype.map.call($("#xtszLbTree .tree-title"), titleDom => {
     $title = $(titleDom);
     aa.push($title.attr("title"));
 }) */
-function getTableHeader(selector) {
+function getTableHeader(selector, $ = window.$) {
 
     let $table = $(selector);
     let tableHeader = [];
@@ -88,7 +166,7 @@ function getTableHeader(selector) {
             let $td = $(tdDom);
             let rowspan = Number($td.attr("rowspan") || 1);
             let colspan = Number($td.attr("colspan") || 1);
-            let prop = $td.attr("field")
+            let prop = $td.attr("field");
             let label = $td.text().trim();
             let tdItem = {
                 prop,
@@ -96,12 +174,12 @@ function getTableHeader(selector) {
                 colspan,
                 rowspan
             };
-            tableTr.push(tdItem)
-        })
-        tableHeader.push(tableTr)
+            tableTr.push(tdItem);
+        });
+        tableHeader.push(tableTr);
         /* tableTr */
-    })
-    console.log(tableHeader)
+    });
+    console.log(tableHeader);
     /* tableHeader */
     return (`export let dslTableHeader = ${JSON.stringify(tableHeader)}`);
 }
@@ -149,19 +227,20 @@ function getItem($panels, $ = window.$) {
     }], */
 
     model = getModelFrom($panels);
-    let console_log = (`export let model = ${JSON.stringify(model)};`)
+    let console_log = (`export let model = ${JSON.stringify(model)};`);
 
     dslArray = getDSLFrom($panels);
     // console.log(`dslArray`, dslArray)
-    console_log += (`export let dslArray = ${JSON.stringify(dslArray)};`)
+    console_log += (`export let dslArray = ${JSON.stringify(dslArray)};`);
 
     rules = getRulesFrom(dslArray);
     // console.log(`dslArray`, dslArray)
-    console_log += (`export let rules = ${JSON.stringify(rules)};`)
+    console_log += (`export let rules = ${JSON.stringify(rules)};`);
     return (console_log);
 }
 
 function getModelFrom($panels, $ = window.$) {
+    debugger;
 
     let $trS = $panels.find("tbody > tr");
     /*  */
@@ -173,21 +252,64 @@ function getModelFrom($panels, $ = window.$) {
     Array.prototype.map.call($items4modelValue, items4modelValueDom => {
         let $items4modelValueDom = $(items4modelValueDom);
         items4modelValueObj[$items4modelValueDom.attr("id")] = $items4modelValueDom.attr("value");
-    })
+    });
     /*  */
     let model = {};
     Array.prototype.map.call($items4model, items4modelDom => {
         let $items4modelDom = $(items4modelDom);
         let id = $items4modelDom.attr("id");
         model[id] = items4modelValueObj[id];
-    })
+    });
     /*  */
     Array.prototype.map.call($img4model, img4modelDom => {
         let $items4modelDom = $(img4modelDom);
         let id = $items4modelDom.attr("id");
         model[id] = $items4modelDom.attr("src") || false;
-    })
+    });
     return model;
+}
+
+/* 
+档案总览，只是展示
+ */
+function getDSLFrom3(selector, $ = window.$) {
+    let $table = $(selector);
+    /* Panels=>panel=>row=>col=>items? */
+    let tableInfo = {
+        title: false,
+        rows: []
+    };
+
+    tableInfo.cellspacing = $table.attr("cellspacing") || "";
+    tableInfo.cellpadding = $table.attr("cellpadding") || "";
+    let $trS = $table.find("tbody > tr");
+    Array.prototype.map.call($trS, trDom => {
+        let row = [];
+        let $trDom = $(trDom);
+        let $tdS = $trDom.find("> td");
+        Array.prototype.map.call($tdS, tdDom => {
+            let col = {
+                rowspan: 1,
+                colspan: 1,
+            };
+            let $td = $(tdDom);
+            col.rowspan = $td.attr("rowspan") ? Number($td.attr("rowspan")) : 1;
+            col.colspan = $td.attr("colspan") ? Number($td.attr("colspan")) : 1;
+            col.width = $td.attr("width") ? $td.attr("width") : "";
+            let id = $td.attr("id");
+            if (id && id.length && id.length > 0) {
+                col.type = "input";
+                col.id = id;
+            } else {
+                col.type = "label";
+                col.label = $td.text();
+            }
+            row.push(col);
+        });
+        tableInfo.rows.push(row);
+        /* end let panel = {}; */
+    });
+    return tableInfo;
 }
 /* 没有标题直接一个表单
  */
@@ -199,13 +321,13 @@ function getDSLFrom2(selector, $ = window.$) {
         rows: []
     };
     let $table = $(selector);
-    panel.cellspacing = $table.attr("cellspacing")
+    panel.cellspacing = $table.attr("cellspacing");
     console.log(panel.cellspacing);
-    let $trS = $table.find("tbody > tr")
+    let $trS = $table.find("tbody > tr");
     Array.prototype.map.call($trS, trDom => {
         let row = [];
         let $trDom = $(trDom);
-        let $tdS = $trDom.find("> td")
+        let $tdS = $trDom.find("> td");
         Array.prototype.map.call($tdS, tdDom => {
             let col = {
                 rowspan: 1,
@@ -239,33 +361,33 @@ function getDSLFrom2(selector, $ = window.$) {
                 /*  类型：scha-vue\src\components\input_type_string.js*/
                 (() => {
                     if (itemDom.classList.contains("datebox-f")) {
-                        item.type = "date.picker"
+                        item.type = "date.picker";
                         return;
                     }
 
                     if (itemDom.classList.contains("combo-f")) {
-                        item.type = "select"
+                        item.type = "select";
                         return;
                     }
                     if (itemDom.classList.contains("searchbox-f")) {
-                        item.type = "search"
+                        item.type = "search";
                         return;
                     }
                     if (itemDom.classList.contains("switchbutton-f")) {
-                        item.type = "switch"
-                        item.label = $td.find(".input-label")[0]
+                        item.type = "switch";
+                        item.label = $td.find(".input-label")[0];
                         item.label = item.label.innerText;
                         return;
                     }
                     if (itemDom.classList.contains("checkbox-f")) {
-                        item.type = "checkbox"
+                        item.type = "checkbox";
                         return;
                     }
                     if (item.multiline) {
-                        item.type = "textarea"
+                        item.type = "textarea";
                         return;
                     }
-                })()
+                })();
 
                 col.items.push(item);
                 /* end let col = []; */
@@ -315,13 +437,13 @@ function getDSLFrom($panels, $ = window.$) {
             panel.title = panelTitleDom.innerText;
         }
         let $tbody = $panel.find("table");
-        panel.cellspacing = $tbody.attr("cellspacing")
+        panel.cellspacing = $tbody.attr("cellspacing");
         console.log(panel.cellspacing);
-        let $trS = $panel.find("tbody > tr")
+        let $trS = $panel.find("tbody > tr");
         Array.prototype.map.call($trS, trDom => {
             let row = [];
             let $trDom = $(trDom);
-            let $tdS = $trDom.find("> td")
+            let $tdS = $trDom.find("> td");
             Array.prototype.map.call($tdS, tdDom => {
                 let col = {
                     rowspan: 1,
@@ -355,33 +477,33 @@ function getDSLFrom($panels, $ = window.$) {
                     /*  类型：scha-vue\src\components\input_type_string.js*/
                     (() => {
                         if (itemDom.classList.contains("datebox-f")) {
-                            item.type = "date.picker"
+                            item.type = "date.picker";
                             return;
                         }
 
                         if (itemDom.classList.contains("combo-f")) {
-                            item.type = "select"
+                            item.type = "select";
                             return;
                         }
                         if (itemDom.classList.contains("searchbox-f")) {
-                            item.type = "search"
+                            item.type = "search";
                             return;
                         }
                         if (itemDom.classList.contains("switchbutton-f")) {
-                            item.type = "switch"
-                            item.label = $td.find(".input-label")[0]
+                            item.type = "switch";
+                            item.label = $td.find(".input-label")[0];
                             item.label = item.label.innerText;
                             return;
                         }
                         if (itemDom.classList.contains("checkbox-f")) {
-                            item.type = "checkbox"
+                            item.type = "checkbox";
                             return;
                         }
                         if (item.multiline) {
-                            item.type = "textarea"
+                            item.type = "textarea";
                             return;
                         }
-                    })()
+                    })();
 
                     col.items.push(item);
                     /* end let col = []; */
@@ -450,7 +572,7 @@ function converItem($subItem, subItem, $ = window.$) {
                 console.clear();
                 console.log("property", property);
             } catch (error) {
-                debugger
+                debugger;
             }
         });
 
@@ -468,7 +590,7 @@ function converItem($subItem, subItem, $ = window.$) {
                     }
                 }
             } catch (error) {
-                debugger
+                debugger;
             }
         });
 
@@ -487,15 +609,15 @@ function converItem($subItem, subItem, $ = window.$) {
                     value,
                     text
                 });
-            })
+            });
             dataString.replace(/\{text:'([^\}]*)',value:'([^\}]*)'\}/g, (full, value, text) => {
                 data.push({
                     value,
                     text
                 });
-            })
+            });
             return data;
-        })()
+        })();
 
         /* Switch data key value */
         /* 
@@ -549,9 +671,9 @@ function getRulesFrom(dslArray) {
                         });
                     }
                     if (rule.length > 0) rules[prop] = rule;
-                })
-            })
-        })
-    })
+                });
+            });
+        });
+    });
     return rules;
 }
