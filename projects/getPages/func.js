@@ -49,13 +49,7 @@ function writeFile() {
     //         filename: `妇女病普查影像检查dsl.js`
     //     }
     // });
-    // postM({
-    //     action: "writeFile",
-    //     content: {
-    //         contents: getTableHeader("#header"),
-    //         filename: `随访 header.js`
-    //     },
-    // });
+
     /*  postM({
          action: "writeFile",
          content: {
@@ -65,90 +59,33 @@ function writeFile() {
          },
      }); */
 
-    let targetArray = [{
-        "cc": "lyh-dnsy-contents",
-        "lx": "dasy",
-        "title": "首页"
-    }, {
-        "cc": "lyh-jbda-contents",
-        "lx": "jbzl",
-        "title": "基础档案"
-    }, {
-        "cc": "lyh-bsxwN-contents",
-        "lx": "bsxw_n",
-        "title": "病史询问(男)"
-    }, {
-        "cc": "lyh-bsxwV-contents",
-        "lx": "bsxw_v",
-        "title": "病史询问(女)"
-    }, {
-        "cc": "lyh-tgjc-contents",
-        "lx": "tgjc",
-        "title": "体格检查"
-    }, {
-        "cc": "lyh-lcjc-contents",
-        "lx": "hyjc",
-        "title": "临床检查"
-    }, {
-        "cc": "lyh-yxjc-contents",
-        "lx": "yxjc",
-        "title": "影像检查"
-    }, {
-        "cc": "lyh-pgbg-contents",
-        "lx": "pgbg",
-        "title": "评估报告"
-    }, {
-        "cc": "lyh-zysf-contents",
-        "lx": "zysf",
-        "title": "早期随访登记"
-    }, {
-        "cc": "lyh-rsjj-contents",
-        "lx": "rsjj",
-        "title": "妊娠结局登记"
-    }, {
-        "cc": "lyh-csqx-contents",
-        "lx": "csqx",
-        "title": "出生缺陷登记"
-    }];
 
     postM({
         action: "writeFile",
         content: {
-            contents: `export let dsl = ` + getTableHeader(`#asdfasdfasdfasdf`),
-            filename: `档案总览-table.js`
+            contents: `export let dsl = ` + getTableHeader(`#maintable`),
+            filename: `档案查询-table.js`
         },
     });
 
-  /*   for (let index = 0; index < targetArray.length; index++) {
-        const element = targetArray[index];
-        postM({
-            action: "writeFile",
-            content: {
-                contents: `export let dsl = ` + getDSLFromTable(`.${element.cc}`),
-                filename: `档案总览-${element.title}.js`
-            },
-        });
-    } */
+    /*   for (let index = 0; index < targetArray.length; index++) {
+          const element = targetArray[index];
+          postM({
+              action: "writeFile",
+              content: {
+                  contents: `export let dsl = ` + getDSLFromTable(`.${element.cc}`),
+                  filename: `档案总览-${element.title}.js`
+              },
+          });
+      } */
 
-    /* 获取列表 */
-    /*  let $li = $("#DivyqysYwDbasy > div.lyh-left-nav.lyh-fl > ul").find("li");
-
-     let arr = Array.prototype.map.call($li, li => {
-         return {
-             cc: li.dataset.cc,
-             lx: li.dataset.lx,
-             title: li.innerHTML,
-         };
-     }); */
-
-    /*  postM({
-         action: "writeFile",
-         content: {
-             contents: JSON.stringify(arr),
-             // contents: consoleDataFromTable(".panel.theme-panel-blue.easyui-fluid"),
-             filename: `档案总览数组${$("#exec-payload").val()}.js`
-         },
-     }); */
+    /* postM({
+        action: "writeFile",
+        content: {
+            contents: consoleDataFromTable("#asdfasdfasdfasdf"),
+            filename: `档案总览数组${$("#exec-payload").val()}.js`
+        },
+    }); */
 }
 
 /* 档案首页获取table信息
