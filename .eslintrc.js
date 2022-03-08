@@ -6,7 +6,9 @@ module.exports = {
     globals: {
         "postM": true,
         "require": true,
-        // "$": true,
+        "exports": true,
+        "_": true,
+        "__dirname": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
